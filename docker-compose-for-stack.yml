@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  backend:
+    image: docker-stack-backend:latest
+    volumes:
+      - ./backend/backend:/app/backend
+    labels:
+      - "traefik.backend=api"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=PathPrefixStrip:/api/"
+  frontend:
+    image: nginx:1.13.3-alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    labels:
+      - "traefik.backend=frontend"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=PathPrefix:/"
+  reverse:
+    image: traefik:1.3.7-alpine
+    command: "--configfile=/etc/traefik/traefik.toml"
+    volumes:
+      - ./traefik/traefik.toml:/etc/traefik/traefik.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8088:8080
+      - 8080:80
